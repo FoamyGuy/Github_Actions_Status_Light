@@ -7,15 +7,16 @@ import os
 REPO_WORKFLOW_URL = "https://api.github.com/repos/adafruit/circuitpython/actions/workflows/build.yml/runs"
 POLL_DELAY = 60 * 3  # 3 minutes
 CONCLUSION_LIGHT_TIME = 30  # seconds
+CONCLUSION_BUZZER_TIME = 2  # seconds
 ENABLE_USB_LIGHT_MESSAGES = False
-#serialPort = 'COM57'  # Change to the serial/COM port of the tower light
+# serialPort = 'COM57'  # Change to the serial/COM port of the tower light
 serialPort = '/dev/USBserial0'  # on mac/linux, it will be a /dev path
 
 RED_ON = 0x11
 RED_OFF = 0x21
 RED_BLINK = 0x41
 
-YELLOW_ON= 0x12
+YELLOW_ON = 0x12
 YELLOW_OFF = 0x22
 YELLOW_BLINK = 0x42
 
@@ -29,8 +30,10 @@ BUZZER_BLINK = 0x48
 
 baudRate = 9600
 
+
 def sendCommand(serialport, cmd):
     serialport.write(bytes([cmd]))
+
 
 def resetState():
     # Clean up any old state
@@ -81,7 +84,12 @@ if __name__ == '__main__':
                     print("GREEN ON")
                     if ENABLE_USB_LIGHT_MESSAGES:
                         sendCommand(mSerial, GREEN_ON)
-                    time.sleep(CONCLUSION_LIGHT_TIME)
+                        if CONCLUSION_BUZZER_TIME > 0:
+                            sendCommand(mSerial, BUZZER_ON)
+                            time.sleep(CONCLUSION_BUZZER_TIME)
+                            sendCommand(mSerial, BUZZER_OFF)
+
+                    time.sleep(CONCLUSION_LIGHT_TIME - CONCLUSION_BUZZER_TIME)
                     if ENABLE_USB_LIGHT_MESSAGES:
                         sendCommand(mSerial, GREEN_OFF)
                     print("GREEN OFF")
@@ -89,7 +97,12 @@ if __name__ == '__main__':
                     print("RED ON")
                     if ENABLE_USB_LIGHT_MESSAGES:
                         sendCommand(mSerial, RED_ON)
-                    time.sleep(CONCLUSION_LIGHT_TIME)
+                        if CONCLUSION_BUZZER_TIME > 0:
+                            sendCommand(mSerial, BUZZER_ON)
+                            time.sleep(CONCLUSION_BUZZER_TIME)
+                            sendCommand(mSerial, BUZZER_OFF)
+
+                    time.sleep(CONCLUSION_LIGHT_TIME - CONCLUSION_BUZZER_TIME)
                     if ENABLE_USB_LIGHT_MESSAGES:
                         sendCommand(mSerial, RED_OFF)
                     print("RED OFF")
